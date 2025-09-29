@@ -1,6 +1,6 @@
 package com.zealsinger.interview_butler.session
 
-import java.util.Properties
+import java.util.*
 import javax.mail.Folder
 import javax.mail.Session
 import javax.mail.Store
@@ -31,7 +31,7 @@ class SessionUtil {
         private fun initialize() {
             val HOST = "imap.qq.com"
             val userName = "2397558296@qq.com"
-            val password = "pvbpchwflqbdecdh"
+            val password = "QQ邮箱权限码"
 
             val properties = Properties().apply {
                 put("mail.store.protocol", "imap")

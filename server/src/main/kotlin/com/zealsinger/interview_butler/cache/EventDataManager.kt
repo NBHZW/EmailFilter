@@ -1,6 +1,5 @@
 import com.google.gson.Gson
 import com.zealsinger.interview_butler.cache.Event
-import com.zealsinger.interview_butler.cache.EventListResponse
 
 class EventDataManager {
     companion object {

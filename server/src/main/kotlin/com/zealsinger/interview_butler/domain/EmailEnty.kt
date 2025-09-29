@@ -2,7 +2,7 @@ package com.zealsinger.interview_butler.domain
 
 import kotlinx.serialization.Serializable
 import java.text.SimpleDateFormat
-import java.util.Locale
+import java.util.*
 
 @Serializable
 class EmailEnty(

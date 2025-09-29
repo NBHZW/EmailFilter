@@ -1,17 +1,13 @@
 package com.zealsinger.interview_butler
 
-import com.zealsinger.interview_butler.ai.OpenRouterAI
 import com.zealsinger.interview_butler.router.EmailRouter
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.serialization.kotlinx.serialization
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
@@ -45,8 +41,7 @@ fun Application.module() {
     }
     routing {
         get("/") {
-            val answer = OpenRouterAI().getAnswer("hello")
-            call.respondText("Ktor: ${Greeting().greet()}\nAI: $answer")
+            call.respondText("Ktor: ${Greeting().greet()}\n")
         }
         EmailRouter()
     }
