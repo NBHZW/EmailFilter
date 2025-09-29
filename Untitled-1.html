@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面试日历</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f5f7fa;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 0;
+        }
+        
+        h1 {
+            font-size: 24px;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sync-btn {
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 8px rgba(74, 108, 247, 0.25);
+        }
+        
+        .sync-btn:hover {
+            background: #3b5be3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(74, 108, 247, 0.3);
+        }
+        
+        .sync-btn:active {
+            transform: translateY(0);
+        }
+        
+        .calendar-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #4a6cf7;
+            color: white;
+        }
+        
+        .month-navigation {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .current-month {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .today-btn {
+            background: white;
+            color: #4a6cf7;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .today-btn:hover {
+            background: #f0f4ff;
+        }
+        
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: #f0f4ff;
+            padding: 12px 0;
+            text-align: center;
+            font-weight: 600;
+            color: #4a5c6c;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #eef2f8;
+        }
+        
+        .calendar-day {
+            min-height: 130px;
+            background: white;
+            padding: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .calendar-day:hover {
+            background: #f9fafd;
+        }
+        
+        .day-number {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4a5c6c;
+        }
+        
+        .event-card {
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .event-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .event-company {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .event-type {
+            opacity: 0.9;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7a8aa0;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #ccd4e0;
+        }
+        
+        .empty-state p {
+            font-size: 18px;
+            margin-bottom: 24px;
+        }
+        
+        .connected {
+            border: 2px solid #4a6cf7;
+            box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.3);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #4a6cf7;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(74, 108, 247, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #4a6cf7;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .no-events {
+            color: #aab7c5;
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        .other-month {
+            background-color: #f9f9f9;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <i class="icon">📅</i> 面试日历
+            </h1>
+            <button class="sync-btn" id="syncButton">
+                <i class="icon">🔄</i> 同步邮箱
+            </button>
+        </header>
+        
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <div class="month-navigation">
+                    <button class="nav-btn" id="prevMonth">←</button>
+                    <div class="current-month" id="currentMonth">2025年8月</div>
+                    <button class="nav-btn" id="nextMonth">→</button>
+                </div>
+                <button class="today-btn" id="todayButton">今天</button>
+            </div>
+            
+            <div class="weekdays">
+                <div>周日</div>
+                <div>周一</div>
+                <div>周二</div>
+                <div>周三</div>
+                <div>周四</div>
+                <div>周五</div>
+                <div>周六</div>
+            </div>
+            
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- 日历内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+        
+        <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>正在同步邮箱数据，请稍候...</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 当前显示的日期
+            let currentDate = new Date();
+            // 存储从后端获取的事件数据
+            let eventsData = [];
+            
+            // 获取DOM元素
+            const syncButton = document.getElementById('syncButton');
+            const prevMonthButton = document.getElementById('prevMonth');
+            const nextMonthButton = document.getElementById('nextMonth');
+            const todayButton = document.getElementById('todayButton');
+            const currentMonthElement = document.getElementById('currentMonth');
+            const calendarGrid = document.getElementById('calendarGrid');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            
+            // 初始化日历
+            renderCalendar(currentDate);
+            
+            // 添加事件委托处理
+            addGlobalEventListeners();
+            
+            // 同步按钮点击事件
+            syncButton.addEventListener('click', function() {
+                syncEmailData();
+            });
+            
+            // 上个月按钮点击事件
+            prevMonthButton.addEventListener('click', function() {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar(currentDate);
+            });
+            
+            // 下个月按钮点击事件
+            nextMonthButton.addEventListener('click', function() {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar(currentDate);
+            });
+            
+            // 今天按钮点击事件
+            todayButton.addEventListener('click', function() {
+                currentDate = new Date();
+                renderCalendar(currentDate);
+            });
+            
+            // 同步邮箱数据
+            function syncEmailData() {
+    loadingIndicator.style.display = 'block';
+    
+    fetch('http://localhost:8080/email/findAllEmail')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络响应不正常: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('接收到的数据:', data);
+            
+            // 关键修改：检查数据结构是否正确
+            // 如果后端直接返回数组而非包含events属性的对象
+            eventsData = Array.isArray(data) ? data : (data.events || []);
+            
+            // 验证数据格式是否正确
+            if (eventsData.length > 0) {
+                console.log('第一个事件数据:', eventsData[0]);
+                // 检查是否有必要的字段
+                const requiredFields = ['id', 'company', 'scheduledTime', 'emailReceiveTime'];
+                const firstEvent = eventsData[0];
+                const missingFields = requiredFields.filter(field => !(field in firstEvent));
+                if (missingFields.length > 0) {
+                    console.warn('事件数据缺少必要字段:', missingFields);
+                }
+            }
+            
+            loadingIndicator.style.display = 'none';
+            // 强制重新渲染日历
+            renderCalendar(currentDate);
+        })
+        .catch(error => {
+            console.error('获取数据时出错:', error);
+            loadingIndicator.style.display = 'none';
+            alert('同步失败: ' + error.message);
+        });
+}
+            
+            // 渲染日历
+            function renderCalendar(date) {
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                
+                // 更新当前年月显示
+                currentMonthElement.textContent = `${year}年${month + 1}月`;
+                
+                // 清空日历网格
+                calendarGrid.innerHTML = '';
+                
+                // 获取当月第一天和最后一天
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                
+                // 获取当月第一天是星期几（0是周日）
+                const firstDayIndex = firstDay.getDay();
+                
+                // 获取当月总天数
+                const daysInMonth = lastDay.getDate();
+                
+                // 获取上个月的最后几天（用于填充日历开头）
+                const prevLastDay = new Date(year, month, 0).getDate();
+                
+                // 使用文档片段减少DOM重绘
+                const fragment = document.createDocumentFragment();
+                
+                // 上个月的日子
+                for (let i = firstDayIndex; i > 0; i--) {
+                    const day = prevLastDay - i + 1;
+                    const cell = createDayCellElement(day, month - 1, true);
+                    fragment.appendChild(cell);
+                }
+                
+                // 当月的日子
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const cell = createDayCellElement(i, month, false);
+                    fragment.appendChild(cell);
+                }
+                
+                // 下个月的日子（填充日历结尾）
+                const nextDays = 42 - (firstDayIndex + daysInMonth); // 42是6行7列
+                for (let i = 1; i <= nextDays; i++) {
+                    const cell = createDayCellElement(i, month + 1, true);
+                    fragment.appendChild(cell);
+                }
+                
+                // 一次性添加所有单元格到DOM
+                calendarGrid.appendChild(fragment);
+            }
+            
+            // 创建日期单元格元素
+            function createDayCellElement(day, cellMonth, isOtherMonth) {
+                const cellHTML = createDayCell(day, cellMonth, isOtherMonth);
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = cellHTML;
+                return tempDiv.firstElementChild;
+            }
+            
+            // 创建日期单元格HTML
+            function createDayCell(day, cellMonth, isOtherMonth) {
+                const currentYear = currentDate.getFullYear();
+                
+                // 创建日期对象
+                const cellDate = new Date(currentYear, cellMonth, day);
+                const dateString = formatDate(cellDate);
+                
+                // 检查是否为今天
+                const today = new Date();
+                const isToday = today.toDateString() === cellDate.toDateString();
+                
+                // 检查该日期是否有事件
+                const dayEvents = eventsData.filter(event => {
+        try {
+            // 处理不同格式的日期字符串
+            const emailDate = new Date(event.emailReceiveTime).toISOString().split('T')[0];
+            const scheduledDate = new Date(event.scheduledTime).toISOString().split('T')[0];
+            return emailDate === dateString || scheduledDate === dateString;
+        } catch (error) {
+            console.error('日期格式错误:', event, error);
+            return false;
+        }
+    });
+                
+                // 生成事件卡片HTML
+                let eventsHTML = '';
+                if (dayEvents.length > 0) {
+                    dayEvents.forEach(event => {
+                        const isEmailDate = event.emailReceiveTime.split(' ')[0] === dateString;
+                        const eventDateType = isEmailDate ? '收到邮件' : '安排时间';
+                        
+                        eventsHTML += `
+                            <div class="event-card" data-event-id="${event.id}" style="background: ${event.color};">
+                                <div class="event-company">${event.company}</div>
+                                <div class="event-type">${event.type} - ${eventDateType}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    if (!isOtherMonth) {
+                        eventsHTML = `<div class="no-events">无安排</div>`;
+                    }
+                }
+                
+                // 添加有事件/无事件的标识类
+                const eventClass = dayEvents.length > 0 ? 'has-events' : 'no-events';
+                
+                return `
+                    <div class="calendar-day ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''} ${eventClass}" data-date="${dateString}">
+                        <div class="day-number">${day}</div>
+                        ${eventsHTML}
+                    </div>
+                `;
+            }
+            
+            // 添加全局事件监听器（事件委托）
+            function addGlobalEventListeners() {
+                // 使用事件委托处理日历网格中的所有点击
+                calendarGrid.addEventListener('click', function(e) {
+                    const dayElement = e.target.closest('.calendar-day');
+                    const eventCard = e.target.closest('.event-card');
+                    
+                    // 无论点击什么，先清除所有已有的边框
+                    document.querySelectorAll('.connected').forEach(el => {
+                        el.classList.remove('connected');
+                    });
+                    
+                    if (eventCard) {
+                        // 处理事件卡片点击
+                        e.stopPropagation();
+                        const eventId = eventCard.getAttribute('data-event-id');
+                        const event = eventsData.find(e => e.id === eventId);
+                        
+                        if (event) {
+                            // 高亮关联的日期
+                            const emailDate = event.emailReceiveTime.split(' ')[0];
+                            const scheduledDate = event.scheduledTime.split(' ')[0];
+                            
+                            const emailElement = document.querySelector(`.calendar-day[data-date="${emailDate}"]`);
+                            if (emailElement) emailElement.classList.add('connected');
+                            
+                            const scheduledElement = document.querySelector(`.calendar-day[data-date="${scheduledDate}"]`);
+                            if (scheduledElement) scheduledElement.classList.add('connected');
+                            
+                            // 在新标签页打开链接
+                            window.open(event.link, '_blank');
+                        }
+                    } else if (dayElement && !dayElement.classList.contains('other-month')) {
+                        // 处理日期单元格点击（排除其他月份）
+                        const date = dayElement.getAttribute('data-date');
+                        
+                        // 查找该日期的事件
+                        const dateEvents = eventsData.filter(event => {
+                            const emailDate = event.emailReceiveTime.split(' ')[0];
+                            const scheduledDate = event.scheduledTime.split(' ')[0];
+                            return emailDate === date || scheduledDate === date;
+                        });
+                        
+                        // 只有当有事件时才添加边框
+                        if (dateEvents.length > 0) {
+                            dateEvents.forEach(event => {
+                                const emailDate = event.emailReceiveTime.split(' ')[0];
+                                const scheduledDate = event.scheduledTime.split(' ')[0];
+                                
+                                const emailElement = document.querySelector(`.calendar-day[data-date="${emailDate}"]`);
+                                if (emailElement) emailElement.classList.add('connected');
+                                
+                                const scheduledElement = document.querySelector(`.calendar-day[data-date="${scheduledDate}"]`);
+                                if (scheduledElement) scheduledElement.classList.add('connected');
+                            });
+                        }
+                    }
+                });
+            }
+            
+            // 格式化日期为YYYY-MM-DD
+            function formatDate(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            
+            // 模拟数据加载
+            setTimeout(() => {
+                eventsData = [
+                    {
+                        "id": "mengjia_17468490",
+                        "company": "厦门股份有限公司",
+                        "position": "Java服务端程序（厦门-实习）",
+                        "type": "笔试",
+                        "link": "https://exam.nowcoder.com/cts/xxxx",
+                        "scheduledTime": "2025-09-05 15:00:00",
+                        "emailReceiveTime": "2025-08-31 09:56:21",
+                        "color": "#1E88E5"
+                    },
+                    {
+                        "id": "duoyi_15302253560",
+                        "company": "ojbkg公司",
+                        "position": "未明确（需从邮件推断）",
+                        "type": "面试",
+                        "link": "https://baidu.com",
+                        "scheduledTime": "2025-09-02 13:30:00",
+                        "emailReceiveTime": "2025-09-12 16:53:48",
+                        "color": "#43A047"
+                    }
+                ];
+                renderCalendar(currentDate);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
