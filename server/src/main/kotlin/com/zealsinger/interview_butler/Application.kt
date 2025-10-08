@@ -1,6 +1,7 @@
 package com.zealsinger.interview_butler
 
 import com.zealsinger.interview_butler.router.EmailRouter
+import com.zealsinger.interview_butler.router.TestRouter
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -44,5 +45,6 @@ fun Application.module() {
             call.respondText("Ktor: ${Greeting().greet()}\n")
         }
         EmailRouter()
+        TestRouter()
     }
 }
